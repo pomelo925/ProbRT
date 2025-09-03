@@ -57,7 +57,38 @@ Before using RTGen, ensure you have the following installed on your Linux system
 
 </br>
 
-## 📄 License
+## Project Structure
+
+</div>
+
+```
+rtgen/
+├── gen.sh                      # Main generation script
+├── test.sh                     # Testing script for generated projects
+├── settings.yml                # Global project settings and feature toggles
+├── config/                     # Task-oriented configuration files
+│   ├── readme.yml              # README.md generation settings
+│   ├── docker.yml              # Docker containerization settings
+│   ├── license.yml             # License file configuration
+│   └── github.yml              # GitHub workflows and repository settings
+├── templates/                  # Template files for generation
+│   ├── docker/                 # Docker templates (Dockerfile, compose)
+│   ├── github/                 # GitHub workflow templates
+│   ├── gitignore/              # Language-specific .gitignore files
+│   ├── license/                # License templates (MIT, Apache, GPL)
+│   └── readme/                 # README.md template
+├── scripts/                    # Utility scripts
+│   ├── docker_utils.sh         # Docker-related helper functions
+│   ├── file_utils.sh           # File operation utilities
+│   └── license_utils.sh        # License generation helpers
+└── gen-test/                   # Example generated project for testing
+```
+
+<div align="center">
+
+</br>
+
+## License
 
 </div>
 
@@ -67,7 +98,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
 
-## 👥 Contributors
+## Contributors
 
 </div>
 
