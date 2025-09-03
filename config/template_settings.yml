@@ -1,5 +1,0 @@
-# Template-specific settings
-# (pseudo code)
-docker:
-  base_image: python:3.10
-  expose_ports: [80, 443]

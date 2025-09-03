@@ -1,0 +1,41 @@
+# Docker configuration for containerization
+# This file contains all settings for generating Docker-related files
+
+# Docker image settings
+base_image: python:3.10  # Base Docker image
+working_dir: /app  # Working directory inside container
+
+# Port configuration
+ports:
+  expose: [8000]  # Ports to expose in Dockerfile
+  publish: "8000:8000"  # Port mapping for docker-compose
+
+# Service configuration
+service_name: app  # Service name in docker-compose
+container_name: my-app  # Container name
+
+# Environment variables
+environment:
+  - NODE_ENV=production
+  - PORT=8000
+
+# Volume mounts
+volumes:
+  - "./:/app"  # Mount current directory to /app
+
+# Docker Compose settings
+compose:
+  version: "3.8"
+  restart_policy: unless-stopped
+  
+# Build configuration
+build:
+  context: "."
+  dockerfile: "Dockerfile"
+  
+# Health check
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3

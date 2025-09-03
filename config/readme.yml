@@ -1,0 +1,42 @@
+# README.md generation configuration
+# This file contains all settings for generating README.md files
+
+# Basic project information
+github_username: pomelo925  # Your GitHub username
+repo_name: my-project  # Repository name
+project_tagline: "A brief description of your project"  # Tagline shown under the title
+
+# README content blocks
+project_description: |
+  This is a comprehensive description of your project. Explain what it does, 
+  why it's useful, and what makes it special. You can write multiple lines here 
+  and they will be formatted properly in the generated README.
+
+prerequisites: |
+  Before using this project, ensure you have the following installed:
+  
+  - **Node.js**: Version 16 or higher
+  - **npm**: For package management
+  - **Git**: For version control
+
+installation_usage: |
+  1. Clone the repository:
+     ```bash
+     git clone https://github.com/<github_username>/<repo_name>.git
+     cd <repo_name>
+     ```
+  
+  2. Install dependencies:
+     ```bash
+     npm install
+     ```
+  
+  3. Run the project:
+     ```bash
+     npm start
+     ```
+
+# Template options
+include_badges: true  # Include GitHub badges (stars, forks, etc.)
+include_contributors: true  # Include contributors section
+include_license_section: true  # Include license section

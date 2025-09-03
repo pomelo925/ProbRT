@@ -1,0 +1,54 @@
+# GitHub workflows and repository configuration
+# This file contains settings for generating GitHub-related files
+
+# Repository settings
+repo_name: my-project
+github_username: pomelo925
+default_branch: main
+
+# Workflow configurations
+workflows:
+  ci_cd:
+    enabled: true
+    name: "CI/CD Pipeline"
+    triggers:
+      - push
+      - pull_request
+    branches:
+      - main
+      - develop
+    
+  tests:
+    enabled: true
+    name: "Run Tests"
+    node_versions: [16, 18, 20]  # For Node.js projects
+    python_versions: ["3.8", "3.9", "3.10", "3.11"]  # For Python projects
+    
+  security:
+    enabled: false
+    name: "Security Scan"
+    tools:
+      - codeql
+      - dependency-review
+
+# Issue and PR templates
+issue_templates:
+  bug_report: true
+  feature_request: true
+  custom_template: false
+
+pull_request_template: true
+
+# GitHub Pages (if needed)
+pages:
+  enabled: false
+  source_branch: gh-pages
+  
+# Dependabot configuration
+dependabot:
+  enabled: true
+  schedule: weekly
+  ecosystems:
+    - npm
+    - pip
+    - docker

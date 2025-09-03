@@ -6,7 +6,7 @@
 # DESCRIPTION:
 #   This script tests the dockerT generator by using the configuration settings
 #   and running the generation process. It always generates to gen-test/ directory
-#   relative to FastRT root folder for testing purposes.
+#   relative to rtgen root folder for testing purposes.
 #
 # FEATURES:
 #   - Uses settings from settings.yml directly
@@ -44,7 +44,7 @@ license_type=$(grep '^license:' settings.yml | awk '{print $2}')
 # Set defaults and test output directory
 project_name=${project_name:-"My New Project"}
 license_type=${license_type:-"MIT"}
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # FastRT root directory
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # rtgen root directory
 test_output_dir="$script_dir/gen-test"  # Always use gen-test for testing
 
 # Function to clean up test directory
@@ -57,7 +57,7 @@ cleanup_test() {
 
 # Function to run the test
 run_test() {
-    echo -e "${BLUE}🧪 Testing FastRT Generator${NC}"
+    echo -e "${BLUE}🧪 Testing RTGen Generator${NC}"
     echo -e "${CYAN}📦 Project: ${WHITE}$project_name${NC}"
     echo -e "${CYAN}📁 Test dir: ${WHITE}$(realpath "$test_output_dir")${NC}"
     echo ""

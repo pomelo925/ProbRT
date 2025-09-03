@@ -1,0 +1,18 @@
+# License configuration
+# This file contains settings for generating LICENSE files
+
+# License type
+# Options: MIT, Apache-2.0, GPL-3.0, BSD-3-Clause, ISC
+license_type: MIT
+
+# Copyright information
+copyright_holder: pomelo925  # Name or organization holding the copyright
+copyright_year: 2025  # Year of copyright
+
+# Project information (used in some license templates)
+project_name: my-project
+project_description: "A brief description of the project"
+
+# Additional license settings
+include_year_range: false  # Use "2023-2025" instead of just "2025"
+include_notice_file: false  # Generate additional NOTICE file (for Apache-2.0)

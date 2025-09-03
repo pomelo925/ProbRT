@@ -24,13 +24,13 @@
 # CONFIGURATION:
 #   Edit settings.yml to specify:
 #   - project_name: Name used for README header and project references
-#   - output_dir: Relative path from FastRT root where files will be generated
+#   - output_dir: Relative path from rtgen root where files will be generated
 #   - license: License type (MIT, Apache-2.0, GPL-3.0)
 #   - docker: Docker configuration (base_image, ports, service_name)
 #   - features: List of features to include
 #
 # OUTPUT STRUCTURE:
-#   <FastRT_root>/<output_dir>/
+#   <rtgen_root>/<output_dir>/
 #   ├─ README.md
 #   ├─ .gitignore
 #   ├─ LICENSE
@@ -88,7 +88,7 @@ service_name=$(grep -A 3 '^docker:' settings.yml | grep 'service_name:' | awk '{
 # Set defaults and construct full output path
 project_name=${project_name:-"My New Project"}
 output_dir_relative=${output_dir_relative:-"../generated-repo"}
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # FastRT root directory
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # rtgen root directory
 output_dir="$script_dir/$output_dir_relative"  # Full path to output directory
 license_name=${license_name:-"MIT"}
 base_image=${base_image:-"python:3.10"}

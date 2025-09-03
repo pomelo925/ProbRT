@@ -1,18 +1,20 @@
 # Top-level settings for repo generation
-# Configuration for dockerT repository scaffold generator
+# Configuration for rtgen repository scaffold generator
 
 project_name: my-proj  # Used for README header and project references
-output_dir: ../main-repo  # Relative path from FastRT root where files will be generated (parallel to FastRT)
-license: MIT  # Options: MIT, Apache-2.0, GPL-3.0
+output_dir: ../main-repo  # Relative path from rtgen root where files will be generated (parallel to rtgen)
 shell: bash   # Default shell for generated scripts: bash, fish, zsh
 
-# Docker configuration
-docker:
-  base_image: python:3.10
-  ports: 8000
-  service_name: app
+# Task-oriented configuration files
+config_files:
+  readme: config/readme.yml      # README.md generation settings
+  docker: config/docker.yml      # Docker and containerization settings  
+  license: config/license.yml    # License file generation settings
+  github: config/github.yml      # GitHub workflows and repository settings
 
+# Features to generate (corresponds to config files)
 features:
-  - docker
-  - license
-  - github_workflows
+  - readme    # Generate README.md using readme.yml
+  - docker    # Generate Docker files using docker.yml  
+  - license   # Generate LICENSE using license.yml
+  - github    # Generate GitHub workflows using github.yml
