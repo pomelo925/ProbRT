@@ -16,11 +16,11 @@
 
 </div>
 
-<div align="center">
-
-</div>
+<div align="center" style="max-width: 80%; margin: 0 auto;">
 
 RTGen is a fast and efficient repository template generator that helps developers quickly bootstrap projects with standardized configurations and structures. It provides pre-configured templates for Docker, GitHub workflows, licenses, and more.
+
+</div>
 
 <div align="center">
 
@@ -49,8 +49,10 @@ Before using RTGen, ensure you have the following installed on your Linux system
 
 2. Run scripts to generate project:
    ```bash
-   chmod +x gen.sh test.sh
-   source ./gen.sh
+   chmod +x gen.sh
+   ./gen.sh                     # Generate to default output directory
+   ./gen.sh --output my-proj    # Generate to specific directory
+   ./gen.sh -test               # Run in test mode (generates to gen-test/)
    ```
 
 <div align="center">
@@ -63,24 +65,23 @@ Before using RTGen, ensure you have the following installed on your Linux system
 
 ```
 rtgen/
-├── gen.sh                      # Main generation script
-├── test.sh                     # Testing script for generated projects
+├── gen.sh                      # Main generation script (includes test mode with -test)
 ├── settings.yml                # Global project settings and feature toggles
 ├── config/                     # Task-oriented configuration files
-│   ├── readme.yml              # README.md generation settings
-│   ├── docker.yml              # Docker containerization settings
-│   ├── license.yml             # License file configuration
-│   └── github.yml              # GitHub workflows and repository settings
+│   ├── readme.yml                  # README.md generation settings
+│   ├── docker.yml                  # Docker containerization settings
+│   ├── license.yml                 # License file configuration
+│   └── github.yml                  # GitHub workflows and repository settings
 ├── templates/                  # Template files for generation
-│   ├── docker/                 # Docker templates (Dockerfile, compose)
-│   ├── github/                 # GitHub workflow templates
-│   ├── gitignore/              # Language-specific .gitignore files
-│   ├── license/                # License templates (MIT, Apache, GPL)
-│   └── readme/                 # README.md template
+│   ├── docker/                     # Docker templates (Dockerfile, compose)
+│   ├── github/                     # GitHub workflow templates
+│   ├── gitignore/                  # Language-specific .gitignore files
+│   ├── license/                    # License templates (MIT, Apache, GPL)
+│   └── readme/                     # README.md template
 ├── scripts/                    # Utility scripts
-│   ├── docker_utils.sh         # Docker-related helper functions
-│   ├── file_utils.sh           # File operation utilities
-│   └── license_utils.sh        # License generation helpers
+│   ├── docker_utils.sh             # Docker-related helper functions
+│   ├── file_utils.sh               # File operation utilities
+│   └── license_utils.sh            # License generation helpers
 └── gen-test/                   # Example generated project for testing
 ```
 

@@ -20,6 +20,8 @@
 # USAGE:
 #   ./gen.sh                    # Generate repository scaffold using default settings
 #   ./gen.sh --output custom-dir # Generate to custom output directory
+#   ./gen.sh -test              # Run in test mode (generates to gen-test/ directory)
+#   ./gen.sh --test             # Same as -test
 #
 # CONFIGURATION:
 #   Edit settings.yml to specify:
@@ -62,16 +64,66 @@ CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+# TEST FUNCTIONS
+# These functions handle the testing mode functionality (-test flag)
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+
+# Function to clean up test directory
+cleanup_test() {
+    local test_dir="$1"
+    if [ -d "$test_dir" ]; then
+        rm -rf "$test_dir"
+        echo -e "${YELLOW}🧹 Cleaned ${WHITE}$(realpath "$test_dir" 2>/dev/null || echo "gen-test")${NC}"
+    fi
+}
+
+# Function to initialize test mode
+init_test_mode() {
+    echo -e "${BLUE}🧪 Testing RTGen Generator${NC}"
+    echo -e "${CYAN}📦 Project: ${WHITE}$project_name${NC}"
+    echo -e "${CYAN}📁 Test dir: ${WHITE}$(realpath "$output_dir")${NC}"
+    echo ""
+    
+    cleanup_test "$output_dir"
+}
+
+# Function to finalize test mode and show results
+finalize_test_mode() {
+    echo ""
+    # Check if test output directory was created 
+    if [ -d "$output_dir" ]; then
+        local file_count=$(find "$output_dir" -type f | wc -l)
+        echo -e "${GREEN}✅ Test completed!${NC} Generated ${WHITE}$file_count files${NC}"
+    else
+        echo -e "${RED}✗ Test directory not created${NC}"
+    fi
+    
+    echo -e "${PURPLE}📋 Full path: ${WHITE}$(realpath "$output_dir" 2>/dev/null || echo "$output_dir")${NC}"
+}
+
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+# MAIN GENERATION LOGIC
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+
 # Parse command line arguments
 OUTPUT_DIR_OVERRIDE=""
+TEST_MODE=false
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --output)
             OUTPUT_DIR_OVERRIDE="$2"
             shift 2
             ;;
+        -test|--test)
+            TEST_MODE=true
+            OUTPUT_DIR_OVERRIDE="gen-test"
+            shift
+            ;;
         *)
             echo -e "${RED}Unknown option: $1${NC}"
+            echo -e "${CYAN}Usage: $0 [--output <dir>] [-test|--test]${NC}"
             exit 1
             ;;
     esac
@@ -95,8 +147,13 @@ base_image=${base_image:-"python:3.10"}
 docker_ports=${docker_ports:-"8000"}
 service_name=${service_name:-"app"}
 
-echo -e "${BLUE}🚀 Generating ${WHITE}$project_name${BLUE} scaffold...${NC}"
-echo -e "${CYAN}📁 Output: ${WHITE}$(realpath "$output_dir")${NC}"
+# Initialize test mode if enabled
+if [ "$TEST_MODE" = true ]; then
+    init_test_mode
+else
+    echo -e "${BLUE}🚀 Generating ${WHITE}$project_name${BLUE} scaffold...${NC}"
+    echo -e "${CYAN}📁 Output: ${WHITE}$(realpath "$output_dir")${NC}"
+fi
 
 # Create output directory if it doesn't exist
 if [ ! -d "$output_dir" ]; then
@@ -124,10 +181,15 @@ while IFS= read -r feature; do
     esac
 done <<< "$features"
 
-echo ""
-echo -e "${WHITE}📂 Scaffold structure:${NC}"
-if [ -d "$output_dir" ]; then
-    tree "$output_dir" -a --dirsfirst -I '.git'
+# Handle test mode finalization or normal mode output
+if [ "$TEST_MODE" = true ]; then
+    finalize_test_mode
 else
-    echo -e "${RED}  ✗ Directory not found${NC}"
+    echo ""
+    echo -e "${WHITE}📂 Scaffold structure:${NC}"
+    if [ -d "$output_dir" ]; then
+        tree "$output_dir" -a --dirsfirst -I '.git'
+    else
+        echo -e "${RED}  ✗ Directory not found${NC}"
+    fi
 fi

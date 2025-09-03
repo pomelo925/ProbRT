@@ -17,11 +17,11 @@
 
 </div>
 
-<div align="center">
-
-</div>
+<div align="center" style="max-width: 80%; margin: 0 auto;">
 
 <project_description>
+
+</div>
 
 <div align="center">
 
