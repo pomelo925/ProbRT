@@ -1,0 +1,18 @@
+# Top-level settings for repo generation
+# Configuration for dockerT repository scaffold generator
+
+repo_name: my-new-repo
+output_dir: generated-repo  # Directory where generated repo will be created
+license: MIT  # Options: MIT, Apache-2.0, GPL-3.0
+shell: bash   # Default shell for generated scripts: bash, fish, zsh
+
+# Docker configuration
+docker:
+  base_image: python:3.10
+  ports: 8000
+  service_name: app
+
+features:
+  - docker
+  - license
+  - github_workflows

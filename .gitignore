@@ -1,0 +1,11 @@
+# Ignore local development files
+.vscode/
+*.pyc
+__pycache__/
+.env
+
+# Ignore testing files and directories
+test-output/
+test-repo/
+*.test
+testing-*
