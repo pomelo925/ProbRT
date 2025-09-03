@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 # gen.sh - Main generator script for dockerT repository scaffold
 #
@@ -22,14 +23,14 @@
 #
 # CONFIGURATION:
 #   Edit settings.yml to specify:
-#   - repo_name: Name of the target repository
-#   - output_dir: Directory where generated repo will be created
+#   - project_name: Name used for README header and project references
+#   - output_dir: Relative path from FastRT root where files will be generated
 #   - license: License type (MIT, Apache-2.0, GPL-3.0)
 #   - docker: Docker configuration (base_image, ports, service_name)
 #   - features: List of features to include
 #
 # OUTPUT STRUCTURE:
-#   <output_dir>/
+#   <FastRT_root>/<output_dir>/
 #   ├─ README.md
 #   ├─ .gitignore
 #   ├─ LICENSE
@@ -51,53 +52,61 @@ source ./scripts/license_utils.sh
 source ./scripts/docker_utils.sh
 source ./scripts/file_utils.sh
 
+# Color definitions
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
+
 # Parse command line arguments
-OUTPUT_DIR=""
+OUTPUT_DIR_OVERRIDE=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --output)
-            OUTPUT_DIR="$2"
+            OUTPUT_DIR_OVERRIDE="$2"
             shift 2
             ;;
         *)
-            echo "Unknown option: $1"
+            echo -e "${RED}Unknown option: $1${NC}"
             exit 1
             ;;
     esac
 done
 
 # Read configuration from settings.yml
-repo_name=$(grep '^repo_name:' settings.yml | awk '{print $2}')
-output_dir=${OUTPUT_DIR:-$(grep '^output_dir:' settings.yml | awk '{print $2}')}
+project_name=$(grep '^project_name:' settings.yml | sed 's/^project_name: *//' | sed 's/ *#.*//')
+output_dir_relative=${OUTPUT_DIR_OVERRIDE:-$(grep '^output_dir:' settings.yml | awk '{print $2}')}
 license_name=$(grep '^license:' settings.yml | awk '{print $2}')
 base_image=$(grep -A 3 '^docker:' settings.yml | grep 'base_image:' | awk '{print $2}')
 docker_ports=$(grep -A 3 '^docker:' settings.yml | grep 'ports:' | awk '{print $2}')
 service_name=$(grep -A 3 '^docker:' settings.yml | grep 'service_name:' | awk '{print $2}')
 
-# Set defaults
-repo_name=${repo_name:-"my-new-repo"}
-output_dir=${output_dir:-"generated-repo"}
+# Set defaults and construct full output path
+project_name=${project_name:-"My New Project"}
+output_dir_relative=${output_dir_relative:-"../generated-repo"}
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # FastRT root directory
+output_dir="$script_dir/$output_dir_relative"  # Full path to output directory
 license_name=${license_name:-"MIT"}
 base_image=${base_image:-"python:3.10"}
 docker_ports=${docker_ports:-"8000"}
 service_name=${service_name:-"app"}
 
-echo "Generating repository scaffold..."
-echo "Repository: $repo_name"
-echo "Output directory: $output_dir"
-echo "License: $license_name"
+echo -e "${BLUE}🚀 Generating ${WHITE}$project_name${BLUE} scaffold...${NC}"
+echo -e "${CYAN}📁 Output: ${WHITE}$(realpath "$output_dir")${NC}"
 
-# Clean and create output directory
-if [ -d "$output_dir" ]; then
-    rm -rf "$output_dir"
+# Create output directory if it doesn't exist
+if [ ! -d "$output_dir" ]; then
+    mkdir -p "$output_dir"
 fi
-mkdir -p "$output_dir"
 
 # Generate core development files
 get_license_content "$license_name" > "$output_dir/LICENSE"
-echo "✓ LICENSE generated with $license_name license"
 
-generate_readme "$output_dir" "$repo_name" "$license_name" "$service_name"
+generate_readme "$output_dir" "$project_name" "$license_name" "$service_name"
 generate_gitignore "$output_dir"
 
 # Check features and generate accordingly
@@ -107,7 +116,7 @@ while IFS= read -r feature; do
     case "$feature" in
         "docker")
             generate_dockerfile "$output_dir" "$base_image" "$docker_ports" "$service_name"
-            generate_compose "$output_dir" "$service_name" "$docker_ports" "$docker_ports" "$repo_name"
+            generate_compose "$output_dir" "$service_name" "$docker_ports" "$docker_ports" "$project_name"
             ;;
         "github_workflows")
             generate_github_workflow "$output_dir" "$service_name"
@@ -116,18 +125,9 @@ while IFS= read -r feature; do
 done <<< "$features"
 
 echo ""
-echo "Repository scaffold generated successfully in: $output_dir"
-echo "Generated structure:"
-echo "├─ README.md"
-echo "├─ .gitignore"
-echo "├─ LICENSE"
-if [[ "$features" == *"docker"* ]]; then
-    echo "├─ docker/"
-    echo "│  ├─ Dockerfile.$service_name"
-    echo "│  └─ compose.$service_name.yml"
-fi
-if [[ "$features" == *"github_workflows"* ]]; then
-    echo "└─ .github/"
-    echo "   └─ workflows/"
-    echo "      └─ docker.$service_name.yml"
+echo -e "${WHITE}📂 Scaffold structure:${NC}"
+if [ -d "$output_dir" ]; then
+    tree "$output_dir" -a --dirsfirst -I '.git'
+else
+    echo -e "${RED}  ✗ Directory not found${NC}"
 fi

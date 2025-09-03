@@ -1,11 +1,5 @@
-# Ignore local development files
+# ide
 .vscode/
-*.pyc
-__pycache__/
-.env
 
-# Ignore testing files and directories
-test-output/
-test-repo/
-*.test
-testing-*
+# test
+gen-test/

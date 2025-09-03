@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 # docker_utils.sh - Docker template generation utility module
 #
@@ -21,8 +22,14 @@
 #   generate_compose "./output" "my-app" "8000:8000"
 #
 # DEPENDENCIES:
-#   - Template files in ../templates/docker/ directory
-#   - sed command for text replacement
+#   - templates/docker/dockerfile.base
+#   - templates/docker/compose.base.yml
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+
+# Color definitions
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 
 function generate_dockerfile() {
@@ -40,15 +47,13 @@ function generate_dockerfile() {
     elif [ -f "../templates/docker/dockerfile.base" ]; then
         template_path="../templates/docker/dockerfile.base"
     else
-        echo "Error: Dockerfile template not found"
+        echo -e "${RED}Error: Dockerfile template not found${NC}"
         return 1
     fi
     
     cat "$template_path" | \
         sed "s/<base_image>/$base_image/g; s/<ports>/$ports/g; s/<entrypoint>/\"$app_name\"/g" \
         > "$output_dir/docker/Dockerfile.$app_name"
-    
-    echo "Dockerfile generated: docker/Dockerfile.$app_name"
 }
 
 function generate_compose() {
@@ -67,15 +72,13 @@ function generate_compose() {
     elif [ -f "../templates/docker/compose.base.yml" ]; then
         template_path="../templates/docker/compose.base.yml"
     else
-        echo "Error: Docker Compose template not found"
+        echo -e "${RED}Error: Docker Compose template not found${NC}"
         return 1
     fi
     
     cat "$template_path" | \
         sed "s/<image_name>/$image_name/g; s/<host_port>/$host_port/g; s/<container_port>/$container_port/g" \
         > "$output_dir/docker/compose.$service_name.yml"
-    
-    echo "Docker Compose generated: docker/compose.$service_name.yml"
 }
 
 function generate_github_workflow() {

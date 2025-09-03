@@ -26,6 +26,10 @@
 #   - whoami command for current user
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 
+# Color definitions
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 function get_license_content() {
     local license_name="$1"
     local year=$(date +%Y)
@@ -38,7 +42,7 @@ function get_license_content() {
     elif [ -f "../templates/license/$license_name.txt" ]; then
         template_path="../templates/license/$license_name.txt"
     else
-        echo "Error: Template file not found for license: $license_name"
+        echo -e "${RED}Error: Template file not found for license: $license_name${NC}" >&2
         return 1
     fi
     
@@ -53,7 +57,7 @@ function get_license_content() {
             cat "$template_path" | sed "s/<year>/$year/; s/<copyright holder>/$author/"
             ;;
         *)
-            echo "Unknown license: $license_name"
+            echo -e "${RED}Unknown license: $license_name${NC}" >&2
             return 1
             ;;
     esac

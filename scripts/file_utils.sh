@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 # file_utils.sh - File generation utility module from templates
 #
@@ -23,8 +24,15 @@
 #   generate_github_workflow "./output" "app"
 #
 # DEPENDENCIES:
-#   - Template files in templates/ directory
-#   - sed command for text replacement
+#   - templates/readme/README.md
+#   - templates/gitignore/
+#   - templates/github/workflow.yml
+#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+
+# Color definitions
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 
 function generate_readme() {
@@ -40,15 +48,13 @@ function generate_readme() {
     elif [ -f "../templates/readme/README.md" ]; then
         template_path="../templates/readme/README.md"
     else
-        echo "Error: README template not found"
+        echo -e "${RED}Error: README template not found${NC}"
         return 1
     fi
     
     cat "$template_path" | \
         sed "s/<repo_name>/$repo_name/g; s/<license_name>/$license_name/g; s/<service_name>/$service_name/g" \
         > "$output_dir/README.md"
-    
-    echo "✓ README.md generated"
 }
 
 function generate_gitignore() {
@@ -61,13 +67,11 @@ function generate_gitignore() {
     elif [ -f "../templates/gitignore/.gitignore" ]; then
         template_path="../templates/gitignore/.gitignore"
     else
-        echo "Error: .gitignore template not found"
+        echo -e "${RED}Error: .gitignore template not found${NC}"
         return 1
     fi
     
     cp "$template_path" "$output_dir/.gitignore"
-    
-    echo "✓ .gitignore generated"
 }
 
 function generate_github_workflow() {
@@ -83,13 +87,11 @@ function generate_github_workflow() {
     elif [ -f "../templates/github/workflow.yml" ]; then
         template_path="../templates/github/workflow.yml"
     else
-        echo "Error: GitHub workflow template not found"
+        echo -e "${RED}Error: GitHub workflow template not found${NC}"
         return 1
     fi
     
     cat "$template_path" | \
         sed "s/<service_name>/$service_name/g" \
         > "$output_dir/.github/workflows/docker.$service_name.yml"
-    
-    echo "✓ GitHub workflow generated: .github/workflows/docker.$service_name.yml"
 }

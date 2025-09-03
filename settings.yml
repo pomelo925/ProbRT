@@ -1,8 +1,8 @@
 # Top-level settings for repo generation
 # Configuration for dockerT repository scaffold generator
 
-repo_name: my-new-repo
-output_dir: generated-repo  # Directory where generated repo will be created
+project_name: my-proj  # Used for README header and project references
+output_dir: ../main-repo  # Relative path from FastRT root where files will be generated (parallel to FastRT)
 license: MIT  # Options: MIT, Apache-2.0, GPL-3.0
 shell: bash   # Default shell for generated scripts: bash, fish, zsh
 

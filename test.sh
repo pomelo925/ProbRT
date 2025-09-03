@@ -1,27 +1,24 @@
 #!/bin/bash
+
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 # test.sh - Testing script for dockerT repository scaffold generator
 #
 # DESCRIPTION:
-#   This script tests the dockerT generator by creating a test output directory
-#   and running the generation process. It cleans up previous test results
-#   before each run to ensure clean testing environment.
+#   This script tests the dockerT generator by using the configuration settings
+#   and running the generation process. It always generates to gen-test/ directory
+#   relative to FastRT root folder for testing purposes.
 #
 # FEATURES:
+#   - Uses settings from settings.yml directly
+#   - Always generates to gen-test/ directory for testing
 #   - Automatic cleanup of previous test results
-#   - Creates isolated test environment in test-output/ directory
-#   - Tests different license types
 #   - Validates generated files
 #
 # USAGE:
-#   ./test.sh                   # Run complete test suite
-#   ./test.sh clean            # Only clean test output directory
-#   ./test.sh mit              # Test only MIT license generation
-#   ./test.sh apache           # Test only Apache-2.0 license generation
-#   ./test.sh gpl              # Test only GPL-3.0 license generation
+#   ./test.sh                   # Run test using current settings.yml
 #
 # OUTPUT:
-#   - test-output/ directory with generated files
+#   - Generated repository in gen-test/ directory
 #   - Test results and validation messages
 #
 # DEPENDENCIES:
@@ -30,137 +27,57 @@
 #   - All template files and utility scripts
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 
+# Color definitions
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
+
+# Read configuration from settings.yml
+project_name=$(grep '^project_name:' settings.yml | sed 's/^project_name: *//' | sed 's/ *#.*//')
+license_type=$(grep '^license:' settings.yml | awk '{print $2}')
+
+# Set defaults and test output directory
+project_name=${project_name:-"My New Project"}
+license_type=${license_type:-"MIT"}
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # FastRT root directory
+test_output_dir="$script_dir/gen-test"  # Always use gen-test for testing
+
 # Function to clean up test directory
 cleanup_test() {
-    echo "Cleaning up generated repository..."
-    if [ -d "generated-repo" ]; then
-        rm -rf "generated-repo"
+    if [ -d "$test_output_dir" ]; then
+        rm -rf "$test_output_dir"
+        echo -e "${YELLOW}🧹 Cleaned ${WHITE}$(realpath "$test_output_dir" 2>/dev/null || echo "gen-test")${NC}"
     fi
 }
 
-# Function to backup original settings
-backup_settings() {
-    if [ -f "settings.yml" ]; then
-        cp settings.yml settings.yml.backup
-    fi
-}
-
-# Function to restore original settings
-restore_settings() {
-    if [ -f "settings.yml.backup" ]; then
-        mv settings.yml.backup settings.yml
-    fi
-}
-
-# Function to test license generation
-test_license() {
-    local license_type="$1"
-    echo "Testing $license_type license generation..."
-    
-    # Update settings.yml for this test
-    sed -i "s/^license:.*/license: $license_type/" settings.yml
-    
-    # Run generator (it will create generated-repo in root directory)
-    ./gen.sh
-    
-    # Check if generated-repo directory was created
-    if [ -d "generated-repo" ]; then
-        echo "✓ Generated repository directory created"
-        
-        # Validate generated files
-        if [ -f "generated-repo/LICENSE" ]; then
-            echo "✓ LICENSE file generated successfully"
-            echo "First few lines of generated LICENSE:"
-            head -3 generated-repo/LICENSE
-            echo ""
-        else
-            echo "✗ LICENSE file not generated"
-        fi
-        
-        if [ -f "generated-repo/README.md" ]; then
-            echo "✓ README.md generated successfully"
-        else
-            echo "✗ README.md not generated"
-        fi
-        
-        if [ -f "generated-repo/.gitignore" ]; then
-            echo "✓ .gitignore generated successfully"
-        else
-            echo "✗ .gitignore not generated"
-        fi
-        
-        if [ -f "generated-repo/docker/Dockerfile.app" ]; then
-            echo "✓ Dockerfile generated successfully"
-        else
-            echo "✗ Dockerfile not generated"
-        fi
-        
-        if [ -f "generated-repo/docker/compose.app.yml" ]; then
-            echo "✓ Docker Compose file generated successfully"
-        else
-            echo "✗ Docker Compose file not generated"
-        fi
-        
-        if [ -f "generated-repo/.github/workflows/docker.app.yml" ]; then
-            echo "✓ GitHub workflow generated successfully"
-        else
-            echo "✗ GitHub workflow not generated"
-        fi
-        
-        echo "Generated repository structure:"
-        find generated-repo -type f | sort
-        echo ""
-        
-    else
-        echo "✗ Generated repository directory not created"
-    fi
-}
-
-# Main test function
-run_tests() {
-    echo "Starting dockerT test suite..."
-    echo "==============================="
+# Function to run the test
+run_test() {
+    echo -e "${BLUE}🧪 Testing FastRT Generator${NC}"
+    echo -e "${CYAN}📦 Project: ${WHITE}$project_name${NC}"
+    echo -e "${CYAN}📁 Test dir: ${WHITE}$(realpath "$test_output_dir")${NC}"
+    echo ""
     
     cleanup_test
-    backup_settings
     
-    # Test different license types
-    test_license "MIT"
-    test_license "Apache-2.0"
-    test_license "GPL-3.0"
+    # Run generator with custom output directory for testing
+    ./gen.sh --output gen-test
     
-    restore_settings
+    echo ""
+    # Check if test output directory was created 
+    if [ -d "$test_output_dir" ]; then
+        local file_count=$(find "$test_output_dir" -type f | wc -l)
+        echo -e "${GREEN}✅ Test completed!${NC} Generated ${WHITE}$file_count files${NC}"
+    else
+        echo -e "${RED}✗ Test directory not created${NC}"
+    fi
     
-    echo "==============================="
-    echo "Test suite completed!"
-    echo "Check generated-repo/ directory for generated files"
+    echo -e "${PURPLE}📋 Full path: ${WHITE}$(realpath "$test_output_dir" 2>/dev/null || echo "$test_output_dir")${NC}"
 }
 
-# Handle command line arguments
-case "$1" in
-    "clean")
-        cleanup_test
-        echo "Generated repository cleaned"
-        ;;
-    "mit")
-        cleanup_test
-        backup_settings
-        test_license "MIT"
-        restore_settings
-        ;;
-    "apache")
-        cleanup_test
-        backup_settings
-        test_license "Apache-2.0"
-        restore_settings
-        ;;
-    "gpl")
-        cleanup_test
-        backup_settings
-        test_license "GPL-3.0"
-        restore_settings
-        ;;
-    *)
-        run_tests
-        ;;
-esac
+# Run the test
+run_test

@@ -1,0 +1,14 @@
+# Generated docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: my-proj
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/app
+    restart: unless-stopped
