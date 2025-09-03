@@ -1,27 +1,18 @@
 <div align="center">
 
-<p align="center">
-  <img alt="Contributors" src="https://img.shields.io/github/contributors/pomelo925/rtgen.svg?style=for-the-badge">
-  <br>
-  <a href="https://github.com/pomelo925/rtgen/network/members">
-    <img alt="Forks" src="https://img.shields.io/github/forks/pomelo925/rtgen.svg?style=for-the-badge">
-  </a>
-  <a href="https://github.com/pomelo925/rtgen/stargazers">
-    <img alt="Stargazers" src="https://img.shields.io/github/stars/pomelo925/rtgen.svg?style=for-the-badge">
-  </a>
-  <a href="https://github.com/pomelo925/rtgen/issues">
-    <img alt="Issues" src="https://img.shields.io/github/issues/pomelo925/rtgen.svg?style=for-the-badge">
-  </a>
-  <a href="https://github.com/pomelo925/rtgen/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/pomelo925/rtgen.svg?style=for-the-badge">
-  </a>
-</p>
-
 # RTGen
 
 <p align="center">
   <strong>Github Repository Template Generator</strong>
 </p>
+
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+
 
 </div>
 
@@ -45,6 +36,8 @@ Before using RTGen, ensure you have the following installed on your Linux system
 
 - **Bash/Fish Shell**: Required for running the generation scripts
 - **Git**: For version control and repository management
+
+</br>
 
 ### Installation & Usage
 
@@ -95,5 +88,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [issues-url]: https://github.com/pomelo925/rtgen/issues
 [license-shield]: https://img.shields.io/github/license/pomelo925/rtgen.svg?style=for-the-badge
 [license-url]: https://github.com/pomelo925/rtgen/blob/main/LICENSE
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/pomelo925

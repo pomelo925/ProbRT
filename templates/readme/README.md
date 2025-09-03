@@ -1,26 +1,18 @@
 <div align="center">
 
-<p align="center">
-  <img alt="Contributors" src="https://img.shields.io/github/contributors/<github_username>/<repo_name>.svg?style=for-the-badge">
-  <br>
-  <a href="https://github.com/<github_username>/<repo_name>/network/members">
-    <img alt="Forks" src="https://img.shields.io/github/forks/<github_username>/<repo_name>.svg?style=for-the-badge">
-  </a>
-  <a href="https://github.com/<github_username>/<repo_name>/stargazers">
-    <img alt="Stargazers" src="https://img.shields.io/github/stars/<github_username>/<repo_name>.svg?style=for-the-badge">
-  </a>
-  <a href="https://github.com/<github_username>/<repo_name>/issues">
-    <img alt="Issues" src="https://img.shields.io/github/issues/<github_username>/<repo_name>.svg?style=for-the-badge">
-  </a>
-  <a href="https://github.com/<github_username>/<repo_name>/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/<github_username>/<repo_name>.svg?style=for-the-badge">
-  </a>
-</p>
-
 # <repo_name>
 
 <p align="center">
   <strong><project_tagline></strong>
+</p>
+
+<p align="center">
+  [![Contributors][contributors-shield]][contributors-url]
+  <br>
+  [![Forks][forks-shield]][forks-url]
+  [![Stargazers][stars-shield]][stars-url]
+  [![Issues][issues-shield]][issues-url]
+  [![<license_name> License][license-shield]][license-url]
 </p>
 
 </div>

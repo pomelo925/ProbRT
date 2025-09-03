@@ -40,3 +40,21 @@ installation_usage: |
 include_badges: true  # Include GitHub badges (stars, forks, etc.)
 include_contributors: true  # Include contributors section
 include_license_section: true  # Include license section
+
+# Badge configuration (uses reference-style links)
+badges:
+  style: "for-the-badge"  # Badge style: flat, flat-square, plastic, for-the-badge
+  show_contributors: true
+  show_forks: true
+  show_stars: true
+  show_issues: true
+  show_license: true
+  
+# Additional badges (optional)
+additional_badges:
+  linkedin:
+    enabled: false
+    username: "your-linkedin-username"
+  website:
+    enabled: false
+    url: "https://your-website.com"
