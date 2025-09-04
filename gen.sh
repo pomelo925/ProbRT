@@ -1,21 +1,20 @@
 #!/bin/bash
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
-# gen.sh - Main generator script for dockerT repository scaffold
+# gen.sh - Main generator script for rtgen repository scaffold
 #
 # DESCRIPTION:
 #   This script generates a complete repository scaffold based on configuration in settings.yml.
 #   It creates a clean development repository with only necessary project files.
 #
 # FEATURES:
-#   - Generates complete project structure in separate output directory
-#   - Automatic LICENSE file generation based on license type in settings.yml
-#   - Docker configuration (Dockerfile, docker-compose.yml)
-#   - GitHub Actions workflows
+#   - Template-based generation with variable substitution
+#   - Modular configuration system (settings.yml + config files)
+#   - Docker configuration (Dockerfile, docker-compose.yml) with CPU/GPU variants
+#   - GitHub Actions workflows with customizable triggers
 #   - Clean project structure without scaffold tools
 #   - Support for multiple license types (MIT, Apache-2.0, GPL-3.0)
-#   - Modular design with separate utility scripts
-#   - Automatic date and author tracking
+#   - Advanced Docker features (GUI support, device access, workspace volumes)
 #
 # USAGE:
 #   ./gen.sh                    # Generate repository scaffold using default settings
@@ -27,8 +26,8 @@
 #   Edit settings.yml to specify:
 #   - project_name: Name used for README header and project references
 #   - output_dir: Relative path from rtgen root where files will be generated
-#   - license: License type (MIT, Apache-2.0, GPL-3.0)
-#   - docker: Docker configuration (base_image, ports, service_name)
+#   - docker: Docker-specific settings (image_name, image_tag, registry_username)
+#   - github: GitHub-specific settings (username, branches)
 #   - features: List of features to include
 #
 # OUTPUT STRUCTURE:
@@ -37,22 +36,27 @@
 #   ├─ .gitignore
 #   ├─ LICENSE
 #   ├─ docker/
-#   │  ├─ Dockerfile.xxx
-#   │  └─ compose.xxx.yml
+#   │  ├─ dockerfile.cpu
+#   │  ├─ dockerfile.gpu
+#   │  ├─ compose.cpu.yml
+#   │  └─ compose.gpu.yml
 #   └─ .github/
 #      └─ workflows/
-#         └─ docker.xxx.yml
+#         ├─ docker.cpu.yml
+#         └─ docker.gpu.yml
 #
 # DEPENDENCIES:
 #   - settings.yml configuration file
-#   - scripts/license_utils.sh module
-#   - scripts/docker_utils.sh module
+#   - config/ directory with feature-specific configurations
 #   - templates/ directory with all templates
+#   - scripts/template_utils.sh for template processing
+#   - Python 3 with PyYAML for configuration parsing
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 
 source ./scripts/license_utils.sh
 source ./scripts/docker_utils.sh
 source ./scripts/file_utils.sh
+source ./scripts/template_utils.sh
 
 # Color definitions
 RED='\033[0;31m'
@@ -129,23 +133,37 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Read configuration from settings.yml
-project_name=$(grep '^project_name:' settings.yml | sed 's/^project_name: *//' | sed 's/ *#.*//')
-output_dir_relative=${OUTPUT_DIR_OVERRIDE:-$(grep '^output_dir:' settings.yml | awk '{print $2}')}
-license_name=$(grep '^license:' settings.yml | awk '{print $2}')
-base_image=$(grep -A 3 '^docker:' settings.yml | grep 'base_image:' | awk '{print $2}')
-docker_ports=$(grep -A 3 '^docker:' settings.yml | grep 'ports:' | awk '{print $2}')
-service_name=$(grep -A 3 '^docker:' settings.yml | grep 'service_name:' | awk '{print $2}')
+# Check for Python and PyYAML dependency
+if ! command -v python3 &> /dev/null; then
+    echo -e "${RED}Error: Python 3 is required but not installed.${NC}"
+    exit 1
+fi
 
-# Set defaults and construct full output path
-project_name=${project_name:-"My New Project"}
-output_dir_relative=${output_dir_relative:-"../generated-repo"}
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # rtgen root directory
-output_dir="$script_dir/$output_dir_relative"  # Full path to output directory
-license_name=${license_name:-"MIT"}
-base_image=${base_image:-"python:3.10"}
-docker_ports=${docker_ports:-"8000"}
-service_name=${service_name:-"app"}
+if ! python3 -c "import yaml" &> /dev/null; then
+    echo -e "${YELLOW}Installing PyYAML...${NC}"
+    pip3 install PyYAML || {
+        echo -e "${RED}Error: Failed to install PyYAML. Please install it manually: pip3 install PyYAML${NC}"
+        exit 1
+    }
+fi
+
+# Read basic configuration from settings.yml
+project_name=$(python3 -c "
+import yaml
+with open('settings.yml', 'r') as f:
+    data = yaml.safe_load(f)
+print(data.get('project_name', 'My New Project'))
+")
+
+output_dir_relative=${OUTPUT_DIR_OVERRIDE:-$(python3 -c "
+import yaml
+with open('settings.yml', 'r') as f:
+    data = yaml.safe_load(f)
+print(data.get('output_dir', '../generated-repo'))
+")}
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+output_dir="$script_dir/$output_dir_relative"
 
 # Initialize test mode if enabled
 if [ "$TEST_MODE" = true ]; then
@@ -155,31 +173,75 @@ else
     echo -e "${CYAN}📁 Output: ${WHITE}$(realpath "$output_dir")${NC}"
 fi
 
-# Create output directory if it doesn't exist
-if [ ! -d "$output_dir" ]; then
-    mkdir -p "$output_dir"
-fi
+# Create output directory
+mkdir -p "$output_dir"
 
-# Generate core development files
-get_license_content "$license_name" > "$output_dir/LICENSE"
-
-generate_readme "$output_dir" "$project_name" "$license_name" "$service_name"
-generate_gitignore "$output_dir"
-
-# Check features and generate accordingly
-features=$(grep -A 10 '^features:' settings.yml | grep '^  -' | sed 's/^  - //')
+# Generate files based on enabled features
+features=$(python3 -c "
+import yaml
+with open('settings.yml', 'r') as f:
+    data = yaml.safe_load(f)
+features = data.get('features', ['readme', 'license', 'docker', 'github'])
+print('\n'.join(features))
+")
 
 while IFS= read -r feature; do
+    feature=$(echo "$feature" | xargs)  # Trim whitespace
     case "$feature" in
-        "docker")
-            generate_dockerfile "$output_dir" "$base_image" "$docker_ports" "$service_name"
-            generate_compose "$output_dir" "$service_name" "$docker_ports" "$docker_ports" "$project_name"
+        "readme")
+            # Get license type for README generation
+            license_type=$(python3 -c "
+import yaml
+try:
+    with open('config/license.yml', 'r') as f:
+        data = yaml.safe_load(f)
+    print(data.get('license', 'MIT'))
+except:
+    print('MIT')
+")
+            # Get service name for README generation  
+            service_name=$(python3 -c "
+import yaml
+try:
+    with open('config/docker.yml', 'r') as f:
+        data = yaml.safe_load(f)
+    print(data.get('service_name', 'app'))
+except:
+    print('app')
+")
+            generate_readme "$output_dir" "$project_name" "$license_type" "$service_name"
             ;;
-        "github_workflows")
-            generate_github_workflow "$output_dir" "$service_name"
+        "license")
+            # Get license type
+            license_type=$(python3 -c "
+import yaml
+try:
+    with open('config/license.yml', 'r') as f:
+        data = yaml.safe_load(f)
+    print(data.get('license', 'MIT'))
+except:
+    print('MIT')
+")
+            get_license_content "$license_type" > "$output_dir/LICENSE"
+            echo -e "${GREEN}✅ Generated: ${WHITE}LICENSE${NC}"
+            ;;
+        "docker")
+            # Generate Docker files
+            generate_from_template "docker/dockerfile.cpu" "$output_dir/docker/dockerfile.cpu"
+            generate_from_template "docker/dockerfile.gpu" "$output_dir/docker/dockerfile.gpu"
+            generate_from_template "docker/compose.cpu.yml" "$output_dir/docker/compose.cpu.yml"
+            generate_from_template "docker/compose.gpu.yml" "$output_dir/docker/compose.gpu.yml"
+            ;;
+        "github")
+            # Generate GitHub workflow files
+            generate_from_template "github/docker.cpu.yml" "$output_dir/.github/workflows/docker.cpu.yml"
+            generate_from_template "github/docker.gpu.yml" "$output_dir/.github/workflows/docker.gpu.yml"
             ;;
     esac
 done <<< "$features"
+
+# Generate .gitignore
+generate_gitignore "$output_dir"
 
 # Handle test mode finalization or normal mode output
 if [ "$TEST_MODE" = true ]; then

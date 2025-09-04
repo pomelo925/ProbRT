@@ -3,8 +3,30 @@
 
 # Repository settings
 repo_name: my-project
-github_username: pomelo925
 default_branch: main
+
+# Docker workflow configuration
+docker_workflow:
+  enabled: true
+  name: "Docker Build and Push"
+  triggers:
+    on_push:
+      paths:
+        - "docker/dockerfile.*"
+        - "docker/compose.*.yml"
+        - ".github/workflows/docker.*.yml"
+    on_manual: true
+  
+  # Build matrix for different Docker configurations
+  matrix:
+    cpu:
+      dockerfile: "docker/dockerfile.cpu"
+      compose_file: "docker/compose.cpu.yml"
+      workflow_file: ".github/workflows/docker.cpu.yml"
+    gpu:
+      dockerfile: "docker/dockerfile.gpu"
+      compose_file: "docker/compose.gpu.yml"
+      workflow_file: ".github/workflows/docker.gpu.yml"
 
 # Workflow configurations
 workflows:
@@ -14,9 +36,6 @@ workflows:
     triggers:
       - push
       - pull_request
-    branches:
-      - main
-      - develop
     
   tests:
     enabled: true

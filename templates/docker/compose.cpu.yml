@@ -1,0 +1,79 @@
+#############################
+###    shared settings    ###
+#############################
+x-common-settings: &common
+  build:
+    context: {{ docker.build.context }}
+    dockerfile: {{ github.docker_workflow.matrix.cpu.dockerfile }}
+  image: {{ docker.registry_username }}/{{ docker.image_name }}:{{ docker.image_tag }}
+
+  volumes:
+    {% if docker.advanced.gui_support.enabled %}
+    # GUI support for ROS applications
+    {% for volume in docker.advanced.gui_support.x11_volumes %}
+    - "{{ volume }}"
+    {% endfor %}
+    {% endif %}
+    
+    {% if docker.advanced.device_access.enabled %}
+    # Device access
+    {% for volume in docker.advanced.device_access.volumes %}
+    - "{{ volume }}"
+    {% endfor %}
+    {% endif %}
+    
+    # Standard volumes
+    {% for volume in docker.volumes %}
+    - "{{ volume }}"
+    {% endfor %}
+    
+    {% if docker.advanced.workspace_volumes %}
+    # Workspace volumes
+    {% for volume in docker.advanced.workspace_volumes %}
+    - "{{ volume }}"
+    {% endfor %}
+    {% endif %}
+
+  environment:
+    {% if docker.advanced.gui_support.enabled %}
+    {% for env in docker.advanced.gui_support.environment %}
+    - {{ env }}
+    {% endfor %}
+    {% endif %}
+    {% for env in docker.environment %}
+    - {{ env }}
+    {% endfor %}
+    {% for env in docker.advanced.additional_env %}
+    - {{ env }}
+    {% endfor %}
+    
+  network_mode: "{{ docker.advanced.network.mode }}"
+  {% if docker.advanced.network.mode == "host" %}
+  ipc: host
+  {% endif %}
+  
+  # Container settings
+  working_dir: "{{ docker.working_dir }}"
+  {% if docker.advanced.privileged %}
+  privileged: true
+  {% endif %}
+  stdin_open: true
+  tty: true
+  restart: {{ docker.compose.restart_policy }}
+
+##############################
+###   Container Services   ###
+##############################
+services:
+  {{ docker.service_name }}:
+    <<: *common
+    container_name: "{{ docker.container_name }}"
+    ports:
+      - "{{ docker.ports.publish }}"
+    {% if docker.healthcheck %}
+    healthcheck:
+      test: {{ docker.healthcheck.test }}
+      interval: {{ docker.healthcheck.interval }}
+      timeout: {{ docker.healthcheck.timeout }}
+      retries: {{ docker.healthcheck.retries }}
+    {% endif %}

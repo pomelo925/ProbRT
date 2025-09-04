@@ -1,22 +1,22 @@
-# Top-level settings for repo generation
+# Example settings.yml for a ROS robotics project
 # Configuration for rtgen repository scaffold generator
 
-project_name: my-proj  # Used for README header and project references
-output_dir: ../main-repo  # Relative path from rtgen root where files will be generated (parallel to rtgen)
+project_name: stretch3-robot  # Used for README header and project references
+output_dir: ../stretch3-repo  # Relative path from rtgen root where files will be generated
 shell: bash   # Default shell for generated scripts: bash, fish, zsh
 
 # Docker specific settings
 docker:
-  image_name: my-app  # Docker image name
-  image_tag: latest   # Docker image tag
-  registry_username: pomelo925  # Registry username (e.g., Docker Hub username)
+  image_name: stretch3  # Docker image name
+  image_tag: cpu-humble   # Docker image tag
+  registry_username: hrcnthu  # Registry username (e.g., Docker Hub username)
 
 # GitHub specific settings
 github:
   username: pomelo925        # GitHub username for workflows
   branches:                  # Branches to trigger workflows
     - main
-    - develop
+    - dev-pomelo925
 
 # Task-oriented configuration files
 config_files:

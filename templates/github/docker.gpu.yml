@@ -1,0 +1,42 @@
+name: {{ github.docker_workflow.name }} GPU
+
+on:
+  push: 
+      branches: {{ github.branches }}
+      paths:
+      {{ github.docker_workflow.matrix.gpu.dockerfile | add_prefix('- ') }}
+      {{ github.docker_workflow.matrix.gpu.compose_file | add_prefix('- ') }}
+      {{ github.docker_workflow.matrix.gpu.workflow_file | add_prefix('- ') }}
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  docker:
+      runs-on: ubuntu-latest
+      steps:
+      # Initialization
+      - name: Repo Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+            images: ${{ "{{" }} secrets.DOCKERHUB_USERNAME {{ "}}" }}/{{ docker.image_name }}
+            tags: {{ docker.image_tag }}-gpu
+
+      # Login Docker Hub
+      - name: Docker Hub Log-in
+        uses: docker/login-action@v3
+        with:
+            username: ${{ "{{" }} secrets.DOCKERHUB_USERNAME {{ "}}" }}
+            password: ${{ "{{" }} secrets.DOCKERHUB_ACCESS_TOKEN {{ "}}" }}
+
+      # Build and Push Docker image
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: {{ docker.build.context }}                 
+          file: {{ github.docker_workflow.matrix.gpu.dockerfile }}
+          tags: ${{ "{{" }} steps.meta.outputs.tags {{ "}}" }}
+          push: true
+          no-cache: true
