@@ -1,0 +1,73 @@
+#############################
+###    shared settings    ###
+#############################
+x-common-settings: &common
+  build:
+    context: ..
+    dockerfile: docker/dockerfile.gpu
+  image: pomelo925/foo:gpu
+
+  volumes:
+    # GUI support for ROS applications
+    - $HOME/.Xauthority:/root/.Xauthority
+    - /tmp/.X11-unix:/tmp/.X11-unix
+    
+    # Workspace volume
+    - ../workspace:/workspace
+
+  environment:
+    - DISPLAY=${DISPLAY}
+    - XAUTHORITY=/tmp/.docker.xauth
+
+  # Container communication settings
+  network_mode: "host"
+  ipc: host
+  
+  # Container settings
+  tty: true
+  stdin_open: true
+  privileged: true
+  stop_grace_period: 1s
+  working_dir: /workspace
+
+x-healthcheck-settings: &healthcheck
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+
+############################
+###   GPU settings       ###
+############################
+x-gpu-settings: &gpu
+  runtime: nvidia
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+  
+  environment:
+    - NVIDIA_VISIBLE_DEVICES=all
+    - NVIDIA_DRIVER_CAPABILITIES=all
+
+##############################
+###   Container Services   ###
+##############################
+services:
+  dev:
+    <<: [*common, *gpu, *healthcheck]
+    container_name: probrt-gpu-dev
+    ports:
+      - "8000:8000"
+    command: ["/bin/bash"]
+
+  deploy:
+    <<: [*common, *gpu, *healthcheck]
+    container_name: probrt-gpu-deploy
+    ports:
+      - "8001:8000"
+    command: ["/bin/bash"]

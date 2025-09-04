@@ -1,9 +1,9 @@
 <div align="center">
 
-# RTGen
+# ProbRT
 
 <p align="center">
-  <strong>Github Repository Template Generator</strong>
+  <strong>Project-based Repository Template</strong>
 </p>
 
 
@@ -18,7 +18,7 @@
 
 <div align="center" style="max-width: 80%; margin: 0 auto;">
 
-RTGen is a fast and efficient repository template generator that helps developers quickly bootstrap projects with standardized configurations and structures. It provides pre-configured templates for Docker, GitHub workflows, licenses, and more.
+ProbRT is a project-based repository template that provides a complete development environment with Docker containerization, GitHub workflows, and standardized project structures. It offers both CPU and GPU support with multi-stage builds and CI/CD pipelines.
 
 </div>
 
@@ -32,28 +32,35 @@ RTGen is a fast and efficient repository template generator that helps developer
 
 ### Prerequisites
 
-Before using RTGen, ensure you have the following installed on your Linux system:
+Before using ProbRT, ensure you have the following installed on your Linux system:
 
-- **Bash/Fish Shell**: Required for running the generation scripts
-- **Git**: For version control and repository management
+- **Docker & Docker Compose**: Required for containerized development
+- **Git**: For version control and submodule management
+- **NVIDIA Docker Runtime**: Required for GPU support (optional)
 
 </br>
 
 ### Installation & Usage
 
-1. Clone the repository:
+1. Clone the repository with submodules:
    ```bash
-   git clone https://github.com/pomelo925/rtgen.git
-   cd rtgen
+   git clone --recursive https://github.com/pomelo925/ProbRT.git
+   cd ProbRT
    ```
 
-2. Run scripts to generate project:
+2. Run the development environment:
    ```bash
-   chmod +x gen.sh
-   ./gen.sh                     # Generate to default output directory
-   ./gen.sh --output my-proj    # Generate to specific directory
-   ./gen.sh -test               # Run in test mode (generates to gen-test/)
+   ./run.sh <device> <service>
    ```
+
+   <details>
+   <summary><strong>Examples</strong></summary>
+   
+   ```bash
+   ./run.sh cpu dev       # Start CPU development environment
+   ./run.sh gpu deploy    # Start GPU deployment service
+   ```
+   </details>
 
 <div align="center">
 
@@ -64,26 +71,42 @@ Before using RTGen, ensure you have the following installed on your Linux system
 </div>
 
 ```
-rtgen/
-├── gen.sh                      # Main generation script (includes test mode with -test)
-├── settings.yml                # Global project settings and feature toggles
-├── config/                     # Task-oriented configuration files
-│   ├── readme.yml                  # README.md generation settings
-│   ├── docker.yml                  # Docker containerization settings
-│   ├── license.yml                 # License file configuration
-│   └── github.yml                  # GitHub workflows and repository settings
-├── templates/                  # Template files for generation
-│   ├── docker/                     # Docker templates (Dockerfile, compose)
-│   ├── github/                     # GitHub workflow templates
-│   ├── gitignore/                  # Language-specific .gitignore files
-│   ├── license/                    # License templates (MIT, Apache, GPL)
-│   └── readme/                     # README.md template
-├── scripts/                    # Utility scripts
-│   ├── docker_utils.sh             # Docker-related helper functions
-│   ├── file_utils.sh               # File operation utilities
-│   └── license_utils.sh            # License generation helpers
-└── gen-test/                   # Example generated project for testing
+ProbRT/
+├── run.sh                      # Main execution script for Docker services
+├── docker/                     # Docker configuration files
+│   ├── dockerfile.cpu              # CPU-only multi-stage Dockerfile
+│   ├── dockerfile.gpu              # GPU-enabled multi-stage Dockerfile
+│   ├── compose.cpu.yml             # CPU Docker Compose configuration
+│   └── compose.gpu.yml             # GPU Docker Compose configuration
+├── .github/                    # GitHub workflows and CI/CD
+│   └── workflows/
+│       ├── docker.cpu.yml          # CPU Docker build and push workflow
+│       └── docker.gpu.yml          # GPU Docker build and push workflow
+├── workspace/                  # Development workspace (mounted as volume)
+└── README.md                   # Project documentation
 ```
+
+<div align="center">
+
+</br>
+
+## Docker Services
+
+</div>
+
+### CPU Services
+- **dev**: Development environment with interactive shell access
+- **deploy**: Deployment service for production applications
+
+### GPU Services  
+- **dev**: GPU-enabled development environment with NVIDIA runtime
+- **deploy**: GPU-accelerated deployment service
+
+All services include:
+- Health checks for application monitoring
+- Volume mounts for development workspace
+- X11 forwarding for GUI applications
+- Multi-stage builds for optimized container size
 
 <div align="center">
 
@@ -103,20 +126,20 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 </div>
 
-<a href="https://github.com/pomelo925/rtgen/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=pomelo925/rtgen" />
+<a href="https://github.com/pomelo925/ProbRT/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=pomelo925/ProbRT" />
 </a>
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/pomelo925/rtgen.svg?style=for-the-badge
-[contributors-url]: https://github.com/pomelo925/rtgen/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/pomelo925/rtgen.svg?style=for-the-badge
-[forks-url]: https://github.com/pomelo925/rtgen/network/members
-[stars-shield]: https://img.shields.io/github/stars/pomelo925/rtgen.svg?style=for-the-badge
-[stars-url]: https://github.com/pomelo925/rtgen/stargazers
-[issues-shield]: https://img.shields.io/github/issues/pomelo925/rtgen.svg?style=for-the-badge
-[issues-url]: https://github.com/pomelo925/rtgen/issues
-[license-shield]: https://img.shields.io/github/license/pomelo925/rtgen.svg?style=for-the-badge
-[license-url]: https://github.com/pomelo925/rtgen/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/pomelo925/ProbRT.svg?style=for-the-badge
+[contributors-url]: https://github.com/pomelo925/ProbRT/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/pomelo925/ProbRT.svg?style=for-the-badge
+[forks-url]: https://github.com/pomelo925/ProbRT/network/members
+[stars-shield]: https://img.shields.io/github/stars/pomelo925/ProbRT.svg?style=for-the-badge
+[stars-url]: https://github.com/pomelo925/ProbRT/stargazers
+[issues-shield]: https://img.shields.io/github/issues/pomelo925/ProbRT.svg?style=for-the-badge
+[issues-url]: https://github.com/pomelo925/ProbRT/issues
+[license-shield]: https://img.shields.io/github/license/pomelo925/ProbRT.svg?style=for-the-badge
+[license-url]: https://github.com/pomelo925/ProbRT/blob/main/LICENSE

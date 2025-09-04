@@ -1,0 +1,41 @@
+name: Stretch3 CPU Docker Image
+
+on:
+  push: 
+      branches: [ main, dev-pomelo925 ]
+      paths:
+      - docker/dockerfile.cpu
+      - docker/compose.cpu.yml
+      - .github/workflows/docker.cpu.yml
+
+jobs:
+  docker:
+      runs-on: ubuntu-latest
+      steps:
+      # Initialization
+      - name: Repo Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+            images: ${{ secrets.DOCKERHUB_USERNAME }}/foo
+            tags: gpu
+
+      # Login Docker Hub
+      - name: Docker Hub Log-in
+        uses: docker/login-action@v3
+        with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      # Build and Push Docker image
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .                 
+          file: docker/dockerfile.cpu
+          tags: ${{ steps.meta.outputs.tags }}
+          push: true
+          no-cache: true

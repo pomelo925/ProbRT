@@ -1,0 +1,122 @@
+################################################################################################
+# Base NVIDIA CUDA stage
+# - Sets up the foundational CUDA environment with basic utilities
+################################################################################################
+FROM nvidia/cuda:12.4-devel-ubuntu22.04 AS base
+
+LABEL org.opencontainers.image.title="foo"
+LABEL org.opencontainers.image.authors="pomelo925"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV ROS_DISTRO=humble
+ENV TZ=Asia/Taipei
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+
+# Shell configuration
+SHELL ["/bin/bash", "-c"]
+
+# Set timezone and install basic utilities
+RUN echo 'Asia/Taipei' > /etc/timezone \
+    && ln -snf /usr/share/zoneinfo/Asia/Taipei /etc/localtime \
+    && apt-get update \
+    && apt-get install -q -y \
+        tzdata \
+        dirmngr \
+        gnupg2 \
+        build-essential \
+        git \
+        zip \
+        iputils-ping \
+        udev \
+        curl \
+        wget \
+        sudo \
+        software-properties-common \
+        python3.10 \
+        python3.10-dev \
+        python3.10-venv \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.10 as default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+
+################################################################################################
+# ROS2 Humble Development stage
+# - Installs ROS2 environment and development tools
+################################################################################################
+FROM base AS ros2-humble-devel
+
+# Setup ROS2 keys and sources
+RUN set -eux; \
+    key='C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654'; \
+    export GNUPGHOME="$(mktemp -d)"; \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+    mkdir -p /usr/share/keyrings; \
+    gpg --batch --export "$key" > /usr/share/keyrings/ros2-latest-archive-keyring.gpg; \
+    gpgconf --kill all; \
+    rm -rf "$GNUPGHOME"
+
+RUN echo "deb [ signed-by=/usr/share/keyrings/ros2-latest-archive-keyring.gpg ] http://packages.ros.org/ros2/ubuntu jammy main" > /etc/apt/sources.list.d/ros2-latest.list
+
+# Install ROS2 environment and development tools
+RUN apt-get update && \
+    apt-get install -y \
+        ros-humble-ros-base \
+        ros-humble-ament-cmake \
+        ros-humble-ament-cmake-python \
+        ros-humble-ament-cmake-ros \
+        ros-humble-rosidl-default-generators \
+        ros-humble-rosidl-default-runtime \
+        ros-humble-rosidl-generator-py \
+        python3-colcon-common-extensions \
+        python3-colcon-mixin \
+        python3-rosdep \
+        python3-vcstool \
+        python3-colcon-clean \
+        ros-dev-tools \
+        cmake \
+        python3-setuptools \
+        python3-wheel \
+    && rm -rf /var/lib/apt/lists/*
+
+# Bootstrap rosdep and setup colcon
+RUN rosdep init \
+    && rosdep update --rosdistro $ROS_DISTRO \
+    && colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml \
+    && colcon mixin update \
+    && colcon metadata add default https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml \
+    && colcon metadata update
+
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+################################################################################################
+# GPU Dependencies stage
+# - Install GPU-specific dependencies including PyTorch
+################################################################################################
+FROM ros2-humble-devel AS gpu-deps
+
+# Install PyTorch 2.6.0 with CUDA 12.4 support
+RUN pip3 install torch==2.6.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# Install additional GPU utilities
+RUN apt-get update && apt-get install -y \
+        nvidia-utils-535 \
+        libnvidia-encode-535 \
+        libnvidia-decode-535 \
+    && rm -rf /var/lib/apt/lists/*
+
+
+################################################################################################
+# Final Release stage
+# - Sets up environment and creates the final image
+################################################################################################
+FROM gpu-deps AS release
+
+CMD ["/bin/bash"]

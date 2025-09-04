@@ -1,0 +1,68 @@
+#############################
+###    shared settings    ###
+#############################
+x-common-settings: &common
+  build:
+    context: .
+    dockerfile: dockerfile.nano
+  image: pomelo925/foo:nano
+
+  volumes:
+    # GUI support for ROS applications
+    - $HOME/.Xauthority:/root/.Xauthority
+    - /tmp/.X11-unix:/tmp/.X11-unix
+
+    # ROS2 and system access
+    - /dev:/dev
+    - /sys:/sys:ro
+    - /proc:/proc:ro
+    
+    # Workspace volume
+    - ../visualnav-transformer:/workspace
+
+  environment:
+    - ROS_DOMAIN_ID=25
+    - DISPLAY=${DISPLAY}
+    - XAUTHORITY=/tmp/.docker.xauth
+
+  # ROS2 communication settings
+  network_mode: "host"
+  ipc: host
+  pid: "host"
+  shm_size: '2gb'
+  
+  # Container settings
+  tty: true
+  stdin_open: true
+  privileged: true
+  stop_grace_period: 1s
+  restart: unless-stopped
+  working_dir: /workspace
+
+
+############################
+###   GPU settings       ###
+############################
+x-gpu-settings: &gpu
+  runtime: nvidia
+  
+  environment:
+    - NVIDIA_VISIBLE_DEVICES=all
+    - NVIDIA_DRIVER_CAPABILITIES=all
+
+
+##############################
+###   Container Services   ###
+##############################
+services:
+
+  dev:
+    <<: [*common, *gpu]
+    container_name: visualnav-dev
+    command: ["/bin/bash"]
+    
+  deploy:
+    <<: [*common, *gpu]
+    container_name: visualnav-transformer
+    command: ["/bin/bash"]
+

@@ -1,0 +1,59 @@
+#############################
+###    shared settings    ###
+#############################
+x-common-settings: &common
+  build:
+    context: ..
+    dockerfile: dockerfile.cpu
+  image: pomelo925/foo:cpu
+
+  volumes:
+    # GUI support for ROS applications
+    - "${XAUTHORITY:-$HOME/.Xauthority}:${XAUTHORITY:-/root/.Xauthority}"
+    - "/tmp/.X11-unix:/tmp/.X11-unix"
+    - "/etc/localtime:/etc/localtime:ro"
+    
+    # Device access
+    - "/dev:/dev"
+    - "/run/udev:/run/udev"
+    - "/var/run/docker.sock:/var/run/docker.sock"
+
+    # Workspace volumes
+    - "../workspace:/workspace"
+
+  environment:
+    - DISPLAY=${DISPLAY}
+
+  network_mode: "host"
+  ipc: host
+  
+  privileged: true
+  stdin_open: true
+  tty: true
+  stop_grace_period: 1s
+  working_dir: /workspace
+
+x-healthcheck-settings: &healthcheck
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+
+##############################
+###   Container Services   ###
+##############################
+services:
+  dev:
+    <<: [*common, *healthcheck]
+    container_name: probrt-cpu-dev
+    ports:
+      - "8000:8000"
+    command: ["/bin/bash"]
+
+  deploy:
+    <<: [*common, *healthcheck]
+    container_name: probrt-cpu-deploy
+    ports:
+      - "8001:8000"
+    command: ["/bin/bash"]
