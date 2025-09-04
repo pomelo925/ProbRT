@@ -62,6 +62,13 @@ Before using ProbRT, ensure you have the following installed on your Linux syste
    ```
    </details>
 
+3. Configure GitHub Actions secrets for CI/CD workflows:
+   - Go to your repository **Settings** → **Secrets and variables** → **Actions**
+   - Add the following repository secrets:
+     - `DOCKERHUB_USERNAME`: Your Docker Hub username
+     - `DOCKERHUB_TOKEN`: Your Docker Hub access token
+   - These secrets enable automatic Docker image building and pushing via GitHub Actions
+
 <div align="center">
 
 </br>
